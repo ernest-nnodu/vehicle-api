@@ -77,12 +77,10 @@ class CarController {
          * TODO: Use the `assembler` on that saved car and return as part of the response.
          *   Update the first line as part of the above implementing.
          */
-        EntityModel<Car> resource = assembler.toModel(new Car());
+        EntityModel<Car> resource = assembler.toModel(carService.save(car));
 
         //Note: There will be error on this line till above TODOs are implemented
-        return ResponseEntity.created(new URI(resource.getId().expand().getHref())).body(resource);     
-
-        
+        return ResponseEntity.created(resource.getRequiredLink("self").toUri()).body(resource);
     }
 
     /**

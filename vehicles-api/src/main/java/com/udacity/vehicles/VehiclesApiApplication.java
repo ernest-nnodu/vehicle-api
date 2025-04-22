@@ -1,5 +1,8 @@
 package com.udacity.vehicles;
 
+import com.udacity.vehicles.client.maps.MapsClient;
+import com.udacity.vehicles.client.prices.PriceClient;
+import com.udacity.vehicles.domain.Location;
 import com.udacity.vehicles.domain.manufacturer.Manufacturer;
 import com.udacity.vehicles.domain.manufacturer.ManufacturerRepository;
 import org.modelmapper.ModelMapper;
@@ -37,6 +40,24 @@ public class VehiclesApiApplication {
             repository.save(new Manufacturer(102, "Ford"));
             repository.save(new Manufacturer(103, "BMW"));
             repository.save(new Manufacturer(104, "Dodge"));
+        };
+    }
+
+    @Bean
+    CommandLineRunner testMapWebClients(MapsClient mapsClient) {
+        return args -> {
+            Location location = mapsClient.getAddress(new Location(1000.0, 2000.0));
+            System.out.println(location.getLat());
+            System.out.println(location.getLon());
+            System.out.println(location.getAddress());
+            System.out.println(location.getCity());
+        };
+    }
+
+    @Bean
+    CommandLineRunner testPricingWebClients(PriceClient priceClient) {
+        return args -> {
+            System.out.println(priceClient.getPrice(1L));
         };
     }
 
