@@ -131,6 +131,19 @@ public class CarControllerTest {
          * TODO: Add a test to check that the `get` method works by calling
          *   a vehicle by ID. This should utilize the car from `getCar()` below.
          */
+        MvcResult result = mvc.perform(get(new URI("/cars/1")))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String responseBody = result.getResponse().getContentAsString();
+        Car car = json.parseObject(responseBody);
+
+        Assertions.assertAll(
+                () -> Assertions.assertNotNull(car),
+                () -> Assertions.assertEquals(1L, car.getId())
+        );
+
+        verify(carService, times(1)).findById(1L);
     }
 
     /**
