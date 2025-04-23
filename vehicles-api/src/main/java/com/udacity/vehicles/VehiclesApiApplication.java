@@ -44,24 +44,6 @@ public class VehiclesApiApplication {
     }
 
     @Bean
-    CommandLineRunner testMapWebClients(MapsClient mapsClient) {
-        return args -> {
-            Location location = mapsClient.getAddress(new Location(1000.0, 2000.0));
-            System.out.println(location.getLat());
-            System.out.println(location.getLon());
-            System.out.println(location.getAddress());
-            System.out.println(location.getCity());
-        };
-    }
-
-    @Bean
-    CommandLineRunner testPricingWebClients(PriceClient priceClient) {
-        return args -> {
-            System.out.println(priceClient.getPrice(1L));
-        };
-    }
-
-    @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
     }

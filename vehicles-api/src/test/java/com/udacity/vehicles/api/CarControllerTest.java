@@ -2,9 +2,15 @@ package com.udacity.vehicles.api;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.udacity.vehicles.client.maps.MapsClient;
 import com.udacity.vehicles.client.prices.PriceClient;
 import com.udacity.vehicles.domain.Condition;
@@ -12,9 +18,13 @@ import com.udacity.vehicles.domain.Location;
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.Details;
 import com.udacity.vehicles.domain.manufacturer.Manufacturer;
+import com.udacity.vehicles.domain.wrapper.CarListWrapper;
 import com.udacity.vehicles.service.CarService;
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +35,7 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 /**
  * Implements testing of the CarController class.
@@ -39,6 +50,9 @@ public class CarControllerTest {
 
     @Autowired
     private JacksonTester<Car> json;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockitoBean
     private CarService carService;
@@ -87,7 +101,24 @@ public class CarControllerTest {
          *   the whole list of vehicles. This should utilize the car from `getCar()`
          *   below (the vehicle will be the first in the list).
          */
+        MvcResult result = mvc.perform(get(new URI("/cars")))
+                .andExpect(status().isOk())
+                .andReturn();
 
+        String responseBody = result.getResponse().getContentAsString();
+        List<Car> cars = objectMapper.readValue(responseBody, CarListWrapper.class)
+                .getEmbeddedCarList().getCarList();
+
+        Assertions.assertAll(
+                () -> Assertions.assertFalse(cars.isEmpty()),
+                () -> Assertions.assertEquals(1L, cars.getFirst().getId()),
+                () -> Assertions.assertEquals("USED", cars.getFirst().getCondition().name()),
+                () -> Assertions.assertEquals("Impala", cars.getFirst().getDetails().getModel()),
+                () -> Assertions.assertEquals("sedan", cars.getFirst().getDetails().getBody()),
+                () -> Assertions.assertEquals("white", cars.getFirst().getDetails().getExternalColor())
+        );
+
+        verify(carService, times(1)).list();
     }
 
     /**
